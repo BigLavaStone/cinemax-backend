@@ -13,8 +13,8 @@ const showSchema = new mongoose.Schema({
     language: { type: String },
     genere: { type: String },
     synopsys: { type: String },
-    date: { type: Date, required: true }, // Stores the date of the show
-    time: { type: Date, required: true }  // Changed to Date for easy JS Date object manipulation
+    date: { type: Date, required: true }, 
+    time: { type: Date, required: true }  
 }, { timestamps: true });
 
 const Show = mongoose.model("Show", showSchema);
