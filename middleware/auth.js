@@ -12,7 +12,7 @@ export const verifyToken = async (req, res, next) => {
         
         if (!user) return res.status(404).json({ error: "User doesn't exist" });
 
-        req.user = user; // Attach user data to request
+        req.user = user;
         next();
     } catch (error) {
         res.status(401).json({ error: "Invalid token or Other error " && error.message });
