@@ -10,37 +10,33 @@ import {
 
 const router = express.Router();
 
-// ==========================================
-// AUTHENTICATION ROUTES (No token required)
-// ==========================================
+// AUTHENTICATION ROUTES
 router.post('/signup', signup);
 router.post('/login', login);
 
-// ==========================================
 // ALL ROUTES BELOW REQUIRE AUTHENTICATION
-// ==========================================
 router.use(verifyToken); 
 
-// --- USER ROUTES ---
+// USER ROUTES
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
 router.get('/attendee-details', getMainAttendeeDet);
 
-// --- SHOW ROUTES ---
+// SHOW ROUTES 
 router.get('/shows', getShowList);
 router.post('/shows', addShow);
 router.get('/shows/:showId', getShowDetail);
 router.put('/shows/:showId', modifyShow);
 router.delete('/shows/:showId', deleteShow);
 
-// --- HALL ROUTES ---
+// HALL ROUTES 
 router.get('/halls', getHallList);
 router.post('/halls', addHall);
 router.get('/halls/:hallId', getHallDetail);
 router.put('/halls/:hallId', modifyHall);
 router.delete('/halls/:hallId', delHall);
 
-// --- TICKET & SEAT ROUTES ---
+// TICKET & SEAT ROUTES 
 router.get('/shows/:showId/seats', getShowSeatMatrix);
 router.post('/tickets/book', bookShow);
 router.get('/tickets', getTicketList);
