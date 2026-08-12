@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     pwd: { type: String, required: true },
     sic: { type: String },
     branch: { type: String },
-    year: { type: String }, // Changed to String
+    year: { type: String }, 
     type: { type: String, enum: ['user', 'admin'], default: 'user' }
 }, { timestamps: true });
 
