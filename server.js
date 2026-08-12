@@ -1,55 +1,36 @@
 import express from 'express';
-import "dotenv/config";
+import mongoose from 'mongoose';
 import cors from 'cors';
-import http from 'http';
-import { connectDB } from './lib/db.js';
-import userRouter  from './routes/userRoutes.js';
-import messageRouter from './routes/messageRouters.js';
-import { Server } from "socket.io";
+import "dotenv/config";
+import apiRoutes from './routes/index.js';
 
 
+const app = express();
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-//create express app and http server
-const app=express();
-const server = http.createServer(app); // as socket.io needs http server
+// MIDDLEWARE
+app.use(cors()); 
+app.use(express.json()); 
 
-export const io =new Server(server,{
-    cors: {origin: "*"}
-})
+// Basic health check route
+app.get('/', (req, res) => {
+    res.status(200).json({ message: "Cinema Booking API is running!" });
+});
 
-//store online  Users
-export const userSocketMap={} //{userId : socketId}
+// ROUTES
+app.use('/api', apiRoutes);
 
-//socket.io connection handler
- io.on("connection",(socket)=>{
-    const userId = socket.handshake.query.userId;
-    console.log("User connected", userId);
-
-    if(userId) userSocketMap[userId]=socket.id;
-
-    //Emit online users to all connected clients
-
-    io.emit("getOnlineUsers",Object.keys(userSocketMap));
-
-    socket.on("disconnect",()=>{
-        console.log("user Disconnected",userId);
-        delete userSocketMap[userId];
-        io.emit("getOnlineUsers",Object.keys(userSocketMap))
+// DATABASE CONNECTION & SERVER START
+mongoose.connect(MONGODB_URI)
+    .then(() => {
+        console.log('Connected to MongoDB successfully.');
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
     })
- })
-
-
-//middleware setup
-app.use(express.json({limit: "10mb"}));
-app.use(express.urlencoded({ extended: true, limit:"10mb"}))
-app.use(cors());
-
-app.use('/api/status' ,(req,res)=> res.send("server is live"));
-app.use('/api/auth',userRouter);
-app.use ('/api/messages',messageRouter)
-
-//connect to MongoDB
-await connectDB();
-const  PORT= process.env.PORT || 5000;
-
-server.listen(PORT , ()=> console.log('server is running in port : '+ PORT));
+    .catch((error) => {
+        console.error('Error connecting to MongoDB:', error.message);
+        console.log(MONGODB_URI);
+        process.exit(1); 
+    });
