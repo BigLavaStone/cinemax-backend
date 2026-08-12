@@ -8,8 +8,7 @@ import { getShowStat, isHallInUse, isShowSeatBookStarted } from '../utils/helper
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// --- AUTH CONTROLLERS ---
-
+// AUTH CONTROLLERS
 export const signup = async (req, res) => {
     try {
         const { fname, lname, sic, branch, year, email, pwd } = req.body;
@@ -39,12 +38,11 @@ export const login = async (req, res) => {
         res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ error: "Other error" });
-        console.error("Login error:", error); // Log the error for debugging
+        console.error("Login error:", error);
     }
 };
 
-// --- USER CONTROLLERS ---
-
+// USER CONTROLLERS
 export const getProfile = async (req, res) => {
     try {
         const { fname, lname, sic, branch, year, email } = req.user;
@@ -56,16 +54,13 @@ export const getProfile = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        // Extract only the allowed fields from the request body
         const { fname, lname, sic, branch, year } = req.body;
         
-        // Find the user by the ID from the token and update their details
-        // { new: true } ensures it returns the updated document, not the old one
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id, 
             { fname, lname, sic, branch, year },
             { new: true, runValidators: true }
-        ).select('-pwd -type'); // Exclude password and type from the response for security
+        ).select('-pwd -type'); 
 
         if (!updatedUser) return res.status(404).json({ error: "User not found" });
 
@@ -94,15 +89,14 @@ export const getMainAttendeeDet = async (req, res) => {
     }
 };
 
-// --- SHOW CONTROLLERS ---
-
+// SHOW CONTROLLERS 
 export const getShowList = async (req, res) => {
     try {
         const shows = await Show.find().populate('hallId', 'hallName');
         const current = [];
         const past = [];
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Ignore time for comparison as requested
+        today.setHours(0, 0, 0, 0); 
 
         for (const show of shows) {
             const stats = await getShowStat(show._id);
@@ -112,7 +106,7 @@ export const getShowList = async (req, res) => {
                 posterUrl: show.posterUrl,
                 rating: show.rating,
                 language: show.language,
-                genere: show.genere, // Using your spelling
+                genere: show.genere, 
                 date: show.date,
                 time: show.time,
                 hallName: show.hallId.hallName,
@@ -154,7 +148,7 @@ export const getShowDetail = async (req, res) => {
             genere: show.genere,
             date: show.date,
             time: show.time,
-            Synopsys: show.synopsys, // using your spelling
+            Synopsys: show.synopsys, 
             hallId: show.hallId._id || show.hallId,
             hallName: show.hallId.hallName,
             isUserBooked
@@ -197,8 +191,7 @@ export const deleteShow = async (req, res) => {
     }
 };
 
-// --- HALL CONTROLLERS ---
-
+// HALL CONTROLLERS 
 export const getHallList = async (req, res) => {
     try {
         const halls = await Hall.find({}, 'hallName location totalSeat');
@@ -257,8 +250,7 @@ export const delHall = async (req, res) => {
     }
 };
 
-// --- TICKET & SEAT CONTROLLERS ---
-
+// TICKET & SEAT CONTROLLERS 
 export const getShowSeatMatrix = async (req, res) => {
     try {
         const { showId } = req.params;
@@ -267,7 +259,7 @@ export const getShowSeatMatrix = async (req, res) => {
 
         const hall = await Hall.findById(show.hallId);
         
-        // Get all booked seats across all tickets for this show
+        
         const tickets = await Ticket.find({ showId });
         const bookedSeats = tickets.flatMap(ticket => ticket.bookedSeats);
 
@@ -313,7 +305,7 @@ export const bookShow = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: "Other error" && error.message });
-        console.error("Booking error:", error.message); // Log the error for debugging
+        console.error("Booking error:", error.message);
     }
 };
 
@@ -328,7 +320,7 @@ export const getTicketList = async (req, res) => {
         });
 
         const formattedList = tickets
-            .filter(t => new Date(t.showId.date) >= today) // Filter today + future
+            .filter(t => new Date(t.showId.date) >= today)
             .map(t => ({
                 ticketId: t._id,
                 title: t.showId.title,
@@ -345,34 +337,6 @@ export const getTicketList = async (req, res) => {
         res.status(500).json({ error: "Other error" });
     }
 };
-
-// export const getTicket = async (req, res) => {
-//     try {
-//         const { showId } = req.params;
-//         const ticket = await Ticket.findOne({ userId: req.user._id, showId }).populate({
-//             path: 'showId',
-//             populate: { path: 'hallId', select: 'hallName' }
-//         });
-
-//         if (!ticket) return res.status(404).json({ error: "Ticket not found" });
-
-//         res.status(200).json({
-//             ticketId: ticket._id,
-//             title: ticket.showId.title,
-//             posterUrl: ticket.showId.posterUrl,
-//             rating: ticket.showId.rating,
-//             language: ticket.showId.language,
-//             genere: ticket.showId.genere,
-//             date: ticket.showId.date,
-//             time: ticket.showId.time,
-//             hallName: ticket.showId.hallId.hallName,
-//             bookedSeats: ticket.bookedSeats,
-//             attendeeDetails: ticket.attendeeDetails
-//         });
-//     } catch (error) {
-//         res.status(500).json({ error: "Other error" });
-//     }
-// };
 
 export const getTicket = async (req, res) => {
     try {
